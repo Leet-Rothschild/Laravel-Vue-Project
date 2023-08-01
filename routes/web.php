@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardStatController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\UpdateProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,8 +39,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/api/users/{user}', [UserController::class, 'update']);
     Route::delete('/api/users/{user}', [UserController::class, 'destory']);
     Route::delete('/api/users', [UserController::class, 'bulkDelete']);
-
     Route::get('/api/clients', [ClientController::class, 'index']);
+    Route::put('/api/users', [UpdateProfileController::class, 'update']);
+    Route::post('/api/upload-profile-image', [UpdateProfileController::class, 'uploadProfileImage']);
+
+
 
     Route::get('/api/appointment-status', [AppointmentStatusController::class, 'getStatusWithCount']);
     Route::get('/api/appointments', [AppointmentController::class, 'index']);

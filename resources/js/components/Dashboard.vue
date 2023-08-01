@@ -108,3 +108,31 @@ onMounted(() => {
         </div>
     </div>
 </template>
+
+<script>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+export default {
+  setup() {
+    const user = ref({});
+
+    const fetchUserData = () => {
+      axios
+        .get('/api/user')
+        .then((response) => {
+          user.value = response.data;
+        })
+        .catch((error) => {
+          console.error('Error fetching user data:', error);
+        });
+    };
+
+    onMounted(() => {
+      fetchUserData();
+    });
+
+    return { user };
+  },
+};
+</script>

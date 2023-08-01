@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -72,5 +75,27 @@ class UserController extends Controller
         User::whereIn('id', request('ids'))->delete();
 
         return response()->json(['message' => 'Users deleted successfully!']);
+    }
+
+
+    public function uploadProfileImage(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($request->hasFile('profile_image')) {
+            $profileImage = $request->file('profile_image');
+            $path = $profileImage->store('profile_images', 'public');
+
+            $user->profile_image = $path;
+            $user->save();
+
+            return response()->json([
+                'profile_image_url' => asset('storage/' . $path),
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'No profile image uploaded.',
+        ], 400);
     }
 }
