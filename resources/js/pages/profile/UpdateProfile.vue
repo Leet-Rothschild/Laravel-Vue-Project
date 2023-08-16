@@ -1,3 +1,82 @@
+<script setup>
+import { onMounted, reactive, ref } from 'vue';
+import { useToastr } from '@/toastr';
+
+const toastr = useToastr();
+
+const form = ref({
+    name: '',
+    email: '',
+    role: '',
+});
+
+const getUser = () => {
+    axios.get('/api/profile')
+    .then((response) => {
+        form.value = response.data;
+    });
+};
+
+const errors = ref([]);
+const updateProfile = () => {
+    axios.put('/api/profile', form.value)
+    .then((response) => {
+        toastr.success('Profile updated successfully!');
+    })
+    .catch((error) => {
+        if (error.response && error.response.status === 422) {
+            errors.value = error.response.data.errors;
+        }
+    });
+};
+
+const changePasswordForm = reactive({
+    currentPassword: '',
+    password: '',
+    passwordConfirmation: '',
+});
+
+const handleChangePassword = () => {
+    errors.value = '';
+    axios.post('/api/change-user-password', changePasswordForm)
+    .then((response) => {
+        toastr.success(response.data.message);
+        for (const field in changePasswordForm) {
+            changePasswordForm[field] = '';
+        }
+    })
+    .catch((error) => {
+        if (error.response && error.response.status === 422) {
+            errors.value = error.response.data.errors;
+        }
+    });
+};
+
+const fileInput = ref(null);
+
+const openFileInput = () => {
+    fileInput.value.click();
+};
+
+const profilePictureUrl = ref(null);
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    profilePictureUrl.value = URL.createObjectURL(file);
+
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+
+    axios.post('/api/upload-profile-image', formData)
+    .then((response) => {
+        toastr.success('Image uploaded successfully!');
+    });
+};
+
+onMounted(() => {
+    getUser();
+});
+</script>
 <template>
     <div class="content-header">
       <!-- ... (existing content-header) ... -->
@@ -58,60 +137,13 @@
                     <!-- ... (existing form for changing password) ... -->
                   </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import axios from 'axios';
-  
-  const userName = ref('');
-  const userEmail = ref('');
-  const profilePicture = ref('/noimage.png'); // Set a default profile picture URL
-  
-  const newName = ref('');
-  const newEmail = ref('');
-  
-  const fetchUserProfile = () => {
-    axios.get('/api/users') // Assuming this route fetches the user's profile data
-      .then((response) => {
-        const user = response.data; // Assuming the user data is returned as an object
-        userName.value = user.name;
-        userEmail.value = user.email;
-        if (user.profile_picture_url) {
-          profilePicture.value = user.profile_picture_url;
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-  
-  const saveChanges = () => {
-    // Make a request to the backend to update the user's profile with newName and newEmail
-    axios.put('/api/users', {
-      name: newName.value,
-      email: newEmail.value,
-    })
-    .then((response) => {
-      // Update the userName and userEmail with the updated data from the backend
-      userName.value = response.data.name;
-      userEmail.value = response.data.email;
-      // Display a success message or perform any other actions on success
-    })
-    .catch((error) => {
-      console.error(error);
-      // Display an error message or perform any other actions on error
-    });
-  };
-  
-  onMounted(() => {
-    fetchUserProfile();
-  });
-  </script>
-  
+
+
+    <div class="content">
+        <div class="container-fluid">
+        </div>
+    </div>
+</template>
